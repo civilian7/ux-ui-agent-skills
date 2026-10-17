@@ -22,12 +22,15 @@ written by hand; these are measured.
   `tokens <slug>`, which maps the measured colours onto the kit's semantic roles
   verbatim and lists the roles nothing was measured for, so no value is invented.
   It reads `DESIGN_LIBRARY_DIR`, then the `design-taste` skill, then
-  `DESIGN_LIBRARY_URL`. Exit 2 when there is no library: nothing was read.
+  `DESIGN_LIBRARY_URL`; with `DESIGN_LIBRARY_KEY` set it uses the site's
+  authenticated API and sends the key. Exit 2 when there is no library:
+  nothing was read.
 - Two MCP tools: `search_measured_systems` and `get_measured_system`.
 - `apply-aesthetic`, `image-to-code`, `brandkit`, `redesign` and `design-code`
   check the measured library first when the brief names a real brand.
 
-Six unit tests on a two-brand fixture library, and three MCP self-test checks.
+Seven unit tests (a two-brand fixture library, and a local server for the
+keyed API), and three MCP self-test checks.
 
 ---
 

@@ -52,7 +52,8 @@ looks like. Very little can tell it, afterwards, that the contrast it shipped is
 | `get_measured_system` | One measured brand: its `DESIGN.md`, `UX.md` or `HOW-TO-DESIGN.md`, or its colours mapped onto the kit's semantic roles with the roles nothing was measured for listed. |
 
 The measured library is read from `DESIGN_LIBRARY_DIR`, then the `design-taste` skill if installed, then
-`DESIGN_LIBRARY_URL`. With none of them, both tools answer that nothing was read, which is not "no match".
+`DESIGN_LIBRARY_URL` (add `DESIGN_LIBRARY_KEY`, an account's API key, to use its authenticated API). With none
+of them, both tools answer that nothing was read, which is not "no match".
 
 The intended order is `get_doctrine` and `get_tokens` **before** generating,
 `review_ui` after. A gate run after the fact catches less than a rule read

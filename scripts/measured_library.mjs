@@ -13,7 +13,9 @@
  * Where it reads from, first match wins:
  *   1. DESIGN_LIBRARY_DIR, a folder with designs/ ux/ how-to-design/ (and industries/)
  *   2. the design-taste skill, if installed: ~/.claude/skills/design-taste (works offline)
- *   3. DESIGN_LIBRARY_URL, a deployed Design Awesome site (its /api/index.json and /api/<slug>.*.md)
+ *   3. DESIGN_LIBRARY_URL, a deployed Design Awesome site. With DESIGN_LIBRARY_KEY (an account's API key) it reads
+ *      the authenticated API (/api/v1/brands, /api/v1/brands/<slug>/<file>); without one, the public static files
+ *      (/api/index.json, /api/<slug>.md, /api/<slug>.ux.md, /api/<slug>.how.md).
  *
  * Usage:
  *   node scripts/measured_library.mjs source                  # where it reads from, and how many brands
@@ -34,7 +36,7 @@ const FILES = { design: 'designs', ux: 'ux', how: 'how-to-design' };
 export function resolveSource(env = process.env, home = homedir()) {
   const dirs = [env.DESIGN_LIBRARY_DIR, join(home, '.claude/skills/design-taste')].filter(Boolean);
   for (const d of dirs) if (existsSync(join(d, 'designs'))) return { kind: 'dir', root: d };
-  if (env.DESIGN_LIBRARY_URL) return { kind: 'url', root: env.DESIGN_LIBRARY_URL.replace(/\/$/, '') };
+  if (env.DESIGN_LIBRARY_URL) return { kind: 'url', root: env.DESIGN_LIBRARY_URL.replace(/\/$/, ''), ...(env.DESIGN_LIBRARY_KEY ? { key: env.DESIGN_LIBRARY_KEY } : {}) };
   return null;
 }
 
@@ -43,9 +45,12 @@ async function readText(src, rel) {
     const p = join(src.root, rel);
     return existsSync(p) ? readFileSync(p, 'utf8') : null;
   }
-  const r = await fetch(`${src.root}/${rel}`);
+  const r = await fetch(`${src.root}/${rel}`, { headers: authHeaders(src) });
+  if (r.status === 401 || r.status === 429) throw new Error(`${src.root} answered ${r.status}: ${(await r.text()).slice(0, 200)}`);
   return r.ok ? r.text() : null;
 }
+
+const authHeaders = (src) => (src.key ? { Authorization: `Bearer ${src.key}` } : {});
 
 /* ----------------------------------------------------- frontmatter (YAML) */
 // The DESIGN.md frontmatter is generated: nested maps, scalars and quoted strings, two-space indents.
@@ -75,6 +80,16 @@ export function parseFrontmatter(md) {
 /* ------------------------------------------------------------------ index */
 
 async function index(src) {
+  if (src.kind === 'url' && src.key) {
+    const all = [];
+    for (let offset = 0; ; offset += 2000) {
+      const r = await fetch(`${src.root}/api/v1/brands?limit=2000&offset=${offset}`, { headers: authHeaders(src) });
+      if (!r.ok) throw new Error(`${src.root}/api/v1/brands answered ${r.status}: ${(await r.text()).slice(0, 200)}`);
+      const j = await r.json();
+      all.push(...j.brands);
+      if (all.length >= j.total || !j.brands.length) return all;
+    }
+  }
   if (src.kind === 'url') {
     const r = await fetch(`${src.root}/api/index.json`);
     if (!r.ok) throw new Error(`${src.root}/api/index.json answered ${r.status}`);
@@ -134,7 +149,7 @@ export function getDir(src, slug, which = 'design') {
 export async function get(src, slug, which = 'design') {
   if (!/^[a-z0-9-]+$/.test(slug) || !FILES[which]) return null;
   if (src.kind === 'dir') return getDir(src, slug, which);
-  const rel = src.kind === 'dir' ? `${FILES[which]}/${slug}.md` : `api/${slug}${which === 'design' ? '' : `.${which}`}.md`;
+  const rel = src.key ? `api/v1/brands/${slug}/${which}` : `api/${slug}${which === 'design' ? '' : `.${which}`}.md`;
   return readText(src, rel);
 }
 

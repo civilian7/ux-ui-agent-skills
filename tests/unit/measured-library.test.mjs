@@ -69,3 +69,26 @@ test('CLI: exit 0 on a hit, 1 on an unknown brand, 2 when there is no library at
   assert.equal(t.status, 0);
   assert.match(t.stdout, /not measured, kit default kept: .*action\.primary-hover/);
 });
+
+test('URL source with DESIGN_LIBRARY_KEY reads the authenticated API and sends the key', async () => {
+  const { createServer } = await import('node:http');
+  const { search, get } = await import('../../scripts/measured_library.mjs');
+  const seen = [];
+  const srv = createServer((req, res) => {
+    seen.push([req.url, req.headers.authorization]);
+    if (req.headers.authorization !== 'Bearer da_test_key_0123456789abcdef') { res.writeHead(401); return res.end('{"error":"Unknown or revoked API key."}'); }
+    if (req.url.startsWith('/api/v1/brands?')) { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ total: 1, brands: [{ slug: 'acme-bank', name: 'Acme Bank', industry: 'Banking', description: '', primary: '#0a5cff', files: ['design'] }] })); }
+    if (req.url === '/api/v1/brands/acme-bank/design') { res.writeHead(200); return res.end('---\nname: Acme Bank\n---\n'); }
+    res.writeHead(404); res.end();
+  });
+  await new Promise((r) => srv.listen(0, r));
+  const root = `http://127.0.0.1:${srv.address().port}`;
+  try {
+    const src = resolveSource({ DESIGN_LIBRARY_URL: root, DESIGN_LIBRARY_KEY: 'da_test_key_0123456789abcdef' }, EMPTY_HOME);
+    assert.deepEqual((await search(src, 'acme')).map((b) => b.slug), ['acme-bank']);
+    assert.match(await get(src, 'acme-bank', 'design'), /Acme Bank/);
+    assert.ok(seen.every(([, a]) => a === 'Bearer da_test_key_0123456789abcdef'), 'every request carries the key');
+    const bad = resolveSource({ DESIGN_LIBRARY_URL: root, DESIGN_LIBRARY_KEY: 'da_wrong_key_0123456789abcdef' }, EMPTY_HOME);
+    await assert.rejects(() => get(bad, 'acme-bank', 'design'), /401/, 'a refused key is an error, not "no file"');
+  } finally { srv.close(); }
+});
