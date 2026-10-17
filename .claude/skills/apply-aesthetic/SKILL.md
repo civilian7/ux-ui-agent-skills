@@ -17,9 +17,10 @@ Choose and apply a design direction without breaking accessibility.
 ## Steps
 1. **Brief Inference first (mandatory)** — before any tokens, name it: industry/domain, audience & tone, the one mood adjective the result must earn, motion depth, and the layout-family sequence (`${CLAUDE_SKILL_DIR}/../../../taste/design-taste.md` → Brief Inference + Variance Mandate). Generating before deciding = slop.
 2. Pick a direction in `${CLAUDE_SKILL_DIR}/../../../taste/aesthetic-systems.md`:
+   - A **measured brand** (preferred when the user names a real brand): values read from the live site and gated, not written from memory. `node ${CLAUDE_SKILL_DIR}/../../../scripts/measured_library.mjs search <term>` finds it, `show <slug> [design|ux|how]` prints its DESIGN.md, UX.md or HOW-TO-DESIGN.md, and `tokens <slug>` maps its measured colours onto our semantic roles and lists the roles nothing was measured for. MCP: `search_measured_systems`, `get_measured_system`. Exit 2 means no library is installed, not "no match": say so and fall back to the options below.
    - An **archetype** (recipe mapped to our tokens), or
    - A **named library system** — browse with `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/design_systems.py list` (or `search <term>` / `show <name>`); specs live in `${CLAUDE_SKILL_DIR}/../../../design-systems/library/<name>/DESIGN.md`.
-3. Apply the **Library Contract** (in `aesthetic-systems.md`): re-point `semantic.*` tokens to the chosen system's color roles; map typography/spacing/radius/shadow/motion to `${CLAUDE_SKILL_DIR}/../../../tokens/*.json`.
+3. Apply the **Library Contract** (in `aesthetic-systems.md`): re-point `semantic.*` tokens to the chosen system's color roles; for a measured brand, use `tokens <slug>` output verbatim and keep the kit default for each role it lists as unmapped (say which). Map typography/spacing/radius/shadow/motion to `${CLAUDE_SKILL_DIR}/../../../tokens/*.json`.
 4. **Verify contrast** of every mapped color pair (`${CLAUDE_SKILL_DIR}/../../../scripts/contrast.py` / `a11y-audit`). A brand value that fails must be adjusted — taste never overrides POUR.
 5. Add motion per `${CLAUDE_SKILL_DIR}/../../../taste/motion-choreography.md`; run the pre-flight aesthetic check in `design-taste.md`.
 

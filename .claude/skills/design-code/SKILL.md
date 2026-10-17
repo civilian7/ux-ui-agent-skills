@@ -22,7 +22,7 @@ Render components into a target framework via the adapter system.
    - Concise adapters: `${CLAUDE_SKILL_DIR}/../../../frameworks/adapters/{vue,svelte,angular,solid,web-components-lit,react-native,flutter,jetpack-compose,vanilla-css,css-in-js}.md`.
    - **No file for the target?** Generate an adapter on the fly using the protocol's "author a new adapter" checklist.
 4. Pull the component spec from `${CLAUDE_SKILL_DIR}/../../../components/*` and the ARIA pattern from `${CLAUDE_SKILL_DIR}/../../../accessibility/aria-patterns.md`.
-5. Resolve all values to tokens (`${CLAUDE_SKILL_DIR}/../../../tokens/*.json`); apply aesthetic direction if requested (`apply-aesthetic` skill).
+5. Resolve all values to tokens (`${CLAUDE_SKILL_DIR}/../../../tokens/*.json`); apply aesthetic direction if requested (`apply-aesthetic` skill). When matching a measured brand, its HOW-TO-DESIGN.md (`node ${CLAUDE_SKILL_DIR}/../../../scripts/measured_library.mjs show <slug> how`) gives components as CSS; map those values onto tokens rather than pasting raw values (rule 1 still applies).
 
 ## Output rules (mandatory)
 Use tokens (never hardcode) · include a11y on every interactive element · handle all applicable of the 8 states · support dark mode at the semantic layer · mobile-first · honor reduced motion · **deliver complete files, no placeholders** (`${CLAUDE_SKILL_DIR}/../../../workflows/redesign-audit.md` → Output Completeness).

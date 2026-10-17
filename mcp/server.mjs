@@ -30,6 +30,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve, relative } from 'node:path';
 import { catalogue, byName, KIT } from './gates.mjs';
+import { resolveSource, searchDir, getDir, search as searchUrl, get as getUrl, mapTokens } from '../scripts/measured_library.mjs';
 
 const PROTOCOL = '2025-06-18';
 const pkg = JSON.parse(readFileSync(join(KIT, 'package.json'), 'utf8'));
@@ -114,6 +115,39 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: { name: { type: 'string', description: 'A system name such as stripe or linear. Omit to list them all.' } },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'search_measured_systems',
+    title: 'Search the measured brand library',
+    description:
+      'Brand design systems measured from the live websites by Design Awesome (1,700+ brands, 45 industries), '
+      + 'each gated value by value against the measurement. Prefer these over get_design_system when the brand '
+      + 'exists: their values are read from the page, not described. Search by name or word, optionally within an industry.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Brand name or a word, e.g. stripe, bank, airline. Empty lists the start of the library.' },
+        industry: { type: 'string', description: 'Optional industry filter, e.g. Banking, Airlines, Luxury.' },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'get_measured_system',
+    title: 'Read one measured brand',
+    description:
+      'One measured brand: DESIGN.md (tokens and art direction), UX.md (header, nav, first view, page structure, '
+      + 'phone, motion and accessibility facts) or HOW-TO-DESIGN.md (the build recipe). With file "tokens" it returns '
+      + 'the measured colours mapped onto this kit\'s semantic roles, plus the roles nothing was measured for.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'The brand slug from search_measured_systems, e.g. stripe.' },
+        file: { type: 'string', enum: ['design', 'ux', 'how', 'tokens'], description: 'Which file. Defaults to design.' },
+      },
+      required: ['slug'],
       additionalProperties: false,
     },
   },
@@ -242,6 +276,27 @@ function handle(name, args) {
     return text(readFileSync(p, 'utf8'));
   }
 
+  if (name === 'search_measured_systems' || name === 'get_measured_system') {
+    const src = resolveSource();
+    if (!src) return text('No measured library is installed here: install the design-taste skill, or set DESIGN_LIBRARY_DIR or DESIGN_LIBRARY_URL. Nothing was read, which is not the same as no match.', true);
+    const fmt = (hits) => hits.length
+      ? `${hits.length} measured brand${hits.length === 1 ? '' : 's'}${hits.length > 30 ? ' (first 30)' : ''}:\n\n` + hits.slice(0, 30).map((h) => `${h.slug} | ${h.name} | ${h.industry || 'industry not listed'} | primary ${h.primary || 'not measured'} | files: ${h.files.join(', ')}`).join('\n')
+      : 'No measured brand matches. get_design_system has the hand-written specs.';
+    const show = (slug, file, t) => {
+      if (!t) return text(`No ${file} file for "${slug}". Search first with search_measured_systems.`, true);
+      if (file !== 'tokens') return text(t);
+      const m = mapTokens(t);
+      return text(JSON.stringify(m, null, 2));
+    };
+    const file = args.file || 'design';
+    if (src.kind === 'dir') {
+      if (name === 'search_measured_systems') return text(fmt(searchDir(src, args.query || '', args.industry || '')));
+      return show(args.slug, file, getDir(src, String(args.slug), file === 'tokens' ? 'design' : file));
+    }
+    if (name === 'search_measured_systems') return searchUrl(src, args.query || '', args.industry || '').then((h) => text(fmt(h)));
+    return getUrl(src, String(args.slug), file === 'tokens' ? 'design' : file).then((t) => show(args.slug, file, t));
+  }
+
   if (name === 'get_tokens') {
     const dir = join(KIT, 'tokens');
     if (!existsSync(dir)) return text('The token source is not in this install.', true);
@@ -294,6 +349,8 @@ function dispatch(msg) {
     try {
       const result = handle(params.name, params.arguments || {});
       if (!result) return fail(id, -32602, `Unknown tool: ${params.name}`);
+      // A tool that reads a remote library answers later; everything else answers now.
+      if (typeof result.then === 'function') return result.then((r) => reply(id, r), (e) => reply(id, text(`${tool.name} could not run: ${e.message}`, true)));
       return reply(id, result);
     } catch (e) {
       // A thrown error is the tool failing, not the protocol failing.

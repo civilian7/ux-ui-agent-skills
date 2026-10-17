@@ -57,6 +57,19 @@ export async function selftest(dispatch, TOOLS) {
   res = call('get_tokens', { file: 'spacing' });
   check('get_tokens returns real DTCG', /\$value/.test(res?.content?.[0]?.text || ''));
 
+  // measured library (skipped, and said so, when no source is installed)
+  res = call('search_measured_systems', { query: 'stripe' });
+  const ml = res?.content?.[0]?.text || '';
+  if (/No measured library is installed/.test(ml)) check('measured library: no source here, reported as such (not a pass)', res?.isError === true);
+  else {
+    check('search_measured_systems finds a brand by name', /^\d+ measured brand/.test(ml) && /\bstripe \|/.test(ml), ml.slice(0, 80));
+    res = call('get_measured_system', { slug: 'stripe', file: 'tokens' });
+    let tk = null; try { tk = JSON.parse(res?.content?.[0]?.text || ''); } catch {}
+    check('get_measured_system tokens maps measured colours onto semantic roles', Boolean(tk?.semantic?.['action.primary']?.$value), JSON.stringify(tk?.semantic?.['action.primary']));
+    res = call('get_measured_system', { slug: '../etc/passwd' });
+    check('get_measured_system refuses a path, not a slug', res?.isError === true);
+  }
+
   res = call('get_design_system');
   check('get_design_system lists the library', /\b\d+ systems/.test(res?.content?.[0]?.text || ''));
   res = call('get_design_system', { name: 'definitely-not-a-system' });

@@ -201,7 +201,7 @@ The whole log, including what is still unproven, is in
 | **Prototyping & Research** | Guides through a 5-level fidelity ladder, user journey mapping, and usability testing scripts |
 | **Motion Design** | Tokenized durations, easing curves, transition presets, and reduced-motion strategy for accessible animation |
 | **UX Writing** | Voice & tone system with error/empty-state formulas, microcopy patterns, and inclusive language guidelines |
-| **Design Taste** | Native anti-slop doctrine, aesthetic archetypes, and a library of **138 design systems** for layout variance, editorial typography, and premium visual direction |
+| **Design Taste** | Native anti-slop doctrine, aesthetic archetypes, and a library of **138 design systems** for layout variance, editorial typography, and premium visual direction, plus the **measured library**: real brand sites read with a browser, every value gated (`scripts/measured_library.mjs`) |
 
 ---
 
@@ -284,9 +284,10 @@ nothing was installed. Or skip the copy entirely and use the
 claude mcp add ux-ui-gates -- npx -y --package=ux-ui-agent-skills ux-ui-mcp
 ```
 
-Six tools: `list_gates`, `run_gate`, `review_ui`, `get_doctrine`,
-`get_design_system`, `get_tokens`. Read the doctrine and the tokens before
-generating, run the gates on what you produced after.
+Eight tools: `list_gates`, `run_gate`, `review_ui`, `get_doctrine`,
+`get_design_system`, `get_tokens`, `search_measured_systems`,
+`get_measured_system`. Read the doctrine and the tokens before generating, run
+the gates on what you produced after.
 
 `AGENTS.md` already lets any agent **read** the doctrine. This lets any MCP
 client **run the 52 gates**, which reading cannot do — plenty of things can

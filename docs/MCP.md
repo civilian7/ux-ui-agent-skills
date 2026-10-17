@@ -38,7 +38,7 @@ That is the part worth having. Plenty of things can tell an agent what good UI
 looks like. Very little can tell it, afterwards, that the contrast it shipped is
 3.9:1 on hover.
 
-## The six tools
+## The eight tools
 
 | Tool | What it does |
 |---|---|
@@ -48,6 +48,11 @@ looks like. Very little can tell it, afterwards, that the contrast it shipped is
 | `get_doctrine` | The written rules, by topic: tokens, typography, components, accessibility, frameworks, taste, review, brand, agents. |
 | `get_design_system` | One of the brand-grade `DESIGN.md` specs, or the list of them. |
 | `get_tokens` | The DTCG token source, as a starting point for a project theme. |
+| `search_measured_systems` | Search the measured library: real brand sites read with a browser by [Design Awesome](https://github.com/plugin87/design-awesome), every value gated against the measurement. Filter by name or industry. |
+| `get_measured_system` | One measured brand: its `DESIGN.md`, `UX.md` or `HOW-TO-DESIGN.md`, or its colours mapped onto the kit's semantic roles with the roles nothing was measured for listed. |
+
+The measured library is read from `DESIGN_LIBRARY_DIR`, then the `design-taste` skill if installed, then
+`DESIGN_LIBRARY_URL`. With none of them, both tools answer that nothing was read, which is not "no match".
 
 The intended order is `get_doctrine` and `get_tokens` **before** generating,
 `review_ui` after. A gate run after the fact catches less than a rule read

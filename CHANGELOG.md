@@ -10,6 +10,27 @@ with auto-generated notes instead.
 
 ---
 
+### Unreleased
+
+**Measured brands, not remembered ones.** The kit can now read the
+[Design Awesome](https://github.com/plugin87/design-awesome) library: brand
+design systems read from the live sites with a browser, each value traced to
+the measurement by a gate. The 138 specs in `design-systems/library/` are
+written by hand; these are measured.
+
+- `scripts/measured_library.mjs`: `search`, `show <slug> [design|ux|how]` and
+  `tokens <slug>`, which maps the measured colours onto the kit's semantic roles
+  verbatim and lists the roles nothing was measured for, so no value is invented.
+  It reads `DESIGN_LIBRARY_DIR`, then the `design-taste` skill, then
+  `DESIGN_LIBRARY_URL`. Exit 2 when there is no library: nothing was read.
+- Two MCP tools: `search_measured_systems` and `get_measured_system`.
+- `apply-aesthetic`, `image-to-code`, `brandkit`, `redesign` and `design-code`
+  check the measured library first when the brief names a real brand.
+
+Six unit tests on a two-brand fixture library, and three MCP self-test checks.
+
+---
+
 ### `v2.9.8`
 
 **The Stop hook can no longer block you over another project's files, even if

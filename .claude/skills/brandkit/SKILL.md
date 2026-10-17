@@ -19,7 +19,7 @@ disable-model-invocation: true
 Stand up the *foundation* (one token system everything renders from) before any screen. Get this right and every page stays consistent and themeable from one place.
 
 ## Steps
-1. **Brief Inference (mandatory)** — name the industry, audience, the one mood adjective, and motion depth (`${CLAUDE_SKILL_DIR}/../../../taste/design-taste.md` → Brief Inference). Pick an anchoring archetype from `${CLAUDE_SKILL_DIR}/../../../taste/aesthetic-systems.md`.
+1. **Brief Inference (mandatory)** — name the industry, audience, the one mood adjective, and motion depth (`${CLAUDE_SKILL_DIR}/../../../taste/design-taste.md` → Brief Inference). Pick an anchoring archetype from `${CLAUDE_SKILL_DIR}/../../../taste/aesthetic-systems.md`. For evidence on what an industry actually ships, `node ${CLAUDE_SKILL_DIR}/../../../scripts/measured_library.mjs search --industry=<name>` lists measured brands with their primary colour; cite the ones you anchor to.
 2. **Primitives** — generate the brand color ramp in **OKLCH** (11 shades, consistent chroma) + a neutral ramp; verify the 500 shade ≥ 4.5:1 on white (text) and 600 ≥ 3:1 (UI) per `.claude/rules/tokens-and-color.md` → Color Generation.
 3. **Semantic layer** — map roles to primitives: `action.primary`/`-hover`/`destructive`, `text.{primary,secondary,on-action,link}`, `surface.{page,card,raised}`, `border.{default,strong}`, `feedback.{success,warning,error,info}` — and the **dark** overrides (designed, not inverted).
 4. **Scales** — Major Third type scale + composite text styles, 4px spacing scale, radius tiers, elevation, and `${CLAUDE_SKILL_DIR}/../../../tokens/motion.json`-style durations/easings.

@@ -22,7 +22,7 @@ Audit-first redesign that preserves behavior.
 1. Read `${CLAUDE_SKILL_DIR}/../../../workflows/redesign-audit.md` (the full Scan → Diagnose → Direct → Apply → Verify sequence + Output Completeness).
 2. **Scan** the codebase: framework, styling method (→ route to the matching `frameworks/` adapter), token reality, components, what must be preserved.
 3. **Diagnose** with the Banned Defaults checklist (`${CLAUDE_SKILL_DIR}/../../../taste/design-taste.md`) + the review rubric (`design-review` skill). Produce a prioritized findings table.
-4. **Direct**: choose an archetype/system (`apply-aesthetic` skill) that fits the brand.
+4. **Direct**: choose an archetype/system (`apply-aesthetic` skill) that fits the brand. If the brief names a real reference brand, read its measured UX too (`node ${CLAUDE_SKILL_DIR}/../../../scripts/measured_library.mjs show <slug> ux`): header behaviour, first view, page structure and phone layout as measured, not remembered.
 5. **Apply** in order — tokens first, then typography/spacing, then component states, then motion — without changing routes/data/markup semantics (except a11y fixes).
 6. **Verify**: re-run `design-review` + `a11y-audit`; smoke-test every previously working flow; dark mode + responsive spot-check. Run `${CLAUDE_SKILL_DIR}/../../../scripts/validate_contrast.py` on the token source and `${CLAUDE_SKILL_DIR}/../../../scripts/lint_hardcodes.py` over the changed code.
 
