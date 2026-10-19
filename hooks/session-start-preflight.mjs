@@ -14,6 +14,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { removeLegacyLedgers } from './_ledger.mjs';
+import { browserPresent } from './_browser.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -23,15 +24,6 @@ function playwrightPresent() {
     if (existsSync(p)) return true;
   }
   return false;
-}
-
-/** A browser Playwright can actually drive, without launching one. */
-function browserPresent() {
-  const home = process.env.HOME || '';
-  const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  if (existsSync(macChrome)) return true;
-  const caches = [join(home, 'Library/Caches/ms-playwright'), join(home, '.cache/ms-playwright')];
-  return caches.some(c => existsSync(c));
 }
 
 const pw = playwrightPresent();

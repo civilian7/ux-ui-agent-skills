@@ -34,6 +34,40 @@ keyed API), and three MCP self-test checks.
 
 ---
 
+### `v2.9.9`
+
+**The Stop hook can be satisfied by the command it prints.** In 2.9.8 it could
+not: the agent's Bash tool has neither `CLAUDE_PLUGIN_DATA` nor
+`CLAUDE_SESSION_ID`, so a receipt it wrote landed in `<project>/.ds-receipts/`
+while the hook read the plugin data dir, and the hook blocked every turn for
+the rest of the session (#24).
+
+- **Receipts are read from every place one can be written**: the plugin data
+  dir, the project, the cwd, and each folder above the edited page. Safe
+  because a receipt only counts while the page still hashes as it did when
+  measured.
+- **Only a passing receipt clears a page.** A failing gate is a measurement,
+  not a pass (#27), and a run that printed `SKIPPED` measured nothing (#25).
+  The hook now says which: `not measured` or `measured, failing`.
+- **Only pages are required.** `verify_states` on a stylesheet checks zero
+  elements, so a `.css`, `.tsx` or `.vue` edit no longer blocks.
+- **The printed command is absolute** and carries `CLAUDE_PLUGIN_DATA`, so it
+  works from any cwd. A test runs it verbatim and checks the hook clears.
+- **`measure_render` and `axe_audit` fail under `DS_REQUIRE_BROWSER=1`** when
+  the browser cannot launch or axe-core cannot load, like the other 16 render
+  gates (#25). `axe-core` 4.10.2 is now a devDependency, so in a clone after
+  `npm install` `axe_audit` no longer needs the network. A plugin install
+  still loads it from the CDN. A new guard stubs a failing launch and checks all
+  17 render gates exit non-zero.
+- **Browser detection sees Linux** (`/opt/google/chrome`, `/usr/bin/google-chrome`,
+  Chromium, anything on `PATH`), shared by both hooks instead of two copies of
+  a macOS path list (#26).
+- **Two SKILL.md files had invalid YAML frontmatter** (`data-dashboard`,
+  `design-screen`): an unquoted `: ` in the description. Quoted, and
+  `validate_instruction_surface.py` now rejects the construct (#23).
+
+---
+
 ### `v2.9.8`
 
 **The Stop hook can no longer block you over another project's files, even if
